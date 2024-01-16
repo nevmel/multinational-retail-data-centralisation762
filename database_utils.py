@@ -7,56 +7,54 @@ class DatabaseConnector:
     Reads from the source YAML file and inserts necessary variable from a dictionary"""
 
     def __init__(self):
+        self.yaml_dict = self.read_db_creds()
+        self.engine = self.init_db_engine()
+        self.tables = self.list_db_tables()
+
         pass
     """initailising the 'self' command. Nothing else being passed in at the moment to class"""
 
 
             
 
-    def list_db_tables(self,engine,yaml_dict):
+    def list_db_tables(self):
         
-        conn_engine = engine.connect()
-        db_tables_df = pd.read_sql('SELECT * FROM information_schema.tables',conn_engine)
-        db_tables_list = db_tables_df["table_name"].to_list()
-        print("-" * 20)
-        print(db_tables_list)
+        conn_engine = self.engine.connect() #connect to database from yaml file
+        db_tables_df = pd.read_sql('SELECT * FROM information_schema.tables',conn_engine)#what info to collect
+        db_tables_list = db_tables_df["table_name"].to_list()#list of all table names in database
+        
       
        
 
-    def init_db_engine(self,yaml_dict):
+    def init_db_engine(self):
         
         """Connect to the AICore RDS Database"""
 
         # Database connection details
         DATABASE_TYPE = 'postgresql' #type of database being connected to 
         DBAPI = 'psycopg2' #which API is being used to connect (these could be contained in the yaml file, but aren't in this case)
-        ENDPOINT = yaml_dict["RDS_HOST"] #id details of the store for the database. In this case an AWS cloud location
-        USER = yaml_dict["RDS_USER"] # Name of user
-        PASSWORD = yaml_dict["RDS_PASSWORD"] #Password, not transmitted in clear when connecting
-        PORT = yaml_dict["RDS_PORT"] #standard 5432 in this case, but can be bespoke
-        DATABASE = yaml_dict["RDS_DATABASE"] # format database is stored in
+        ENDPOINT = self.yaml_dict["RDS_HOST"] #id details of the store for the database. In this case an AWS cloud location
+        USER = self.yaml_dict["RDS_USER"] # Name of user
+        PASSWORD = self.yaml_dict["RDS_PASSWORD"] #Password, not transmitted in clear when connecting
+        PORT = self.yaml_dict["RDS_PORT"] #standard 5432 in this case, but can be bespoke
+        DATABASE = self.yaml_dict["RDS_DATABASE"] # format database is stored in
         engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}") # Creates the link to use
-        self.list_db_tables(engine,yaml_dict)
+        return engine
 
     def read_db_creds(self):
         import yaml
         from pathlib import Path
         yaml_dict = yaml.safe_load(Path("db_creds.yaml").read_text()) #creating dictionary from the YAML file to be passed to init_db_engine
-        print(yaml_dict) #just to check something is happening
-        self.init_db_engine(yaml_dict)#pass the dict to the next method
+        return yaml_dict
+      
         
         
 
 
+test = DatabaseConnector()
+
+print(test.list_db_tables())
 
 
 
 
-def testing(): #just here to test the above class coding
-    test = DatabaseConnector()
-    test.read_db_creds()
-    
-   
-    
-
-testing()
