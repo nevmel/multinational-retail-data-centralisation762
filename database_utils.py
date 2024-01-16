@@ -1,3 +1,7 @@
+import pandas as pd
+from sqlalchemy import create_engine
+
+
 class DatabaseConnector:
     """creating a link to the AICore source database 
     Reads from the source YAML file and inserts necessary variable from a dictionary"""
@@ -6,15 +10,22 @@ class DatabaseConnector:
         pass
     """initailising the 'self' command. Nothing else being passed in at the moment to class"""
 
- 
-       
+
+            
+
+    def list_db_tables(self,engine,yaml_dict):
         
+        conn_engine = engine.connect()
+        db_tables_df = pd.read_sql('SELECT * FROM information_schema.tables',conn_engine)
+        db_tables_list = db_tables_df["table_name"].to_list()
+        print("-" * 20)
+        print(db_tables_list)
+      
+       
 
     def init_db_engine(self,yaml_dict):
         
         """Connect to the AICore RDS Database"""
-
-        from sqlalchemy import create_engine
 
         # Database connection details
         DATABASE_TYPE = 'postgresql' #type of database being connected to 
@@ -25,25 +36,7 @@ class DatabaseConnector:
         PORT = yaml_dict["RDS_PORT"] #standard 5432 in this case, but can be bespoke
         DATABASE = yaml_dict["RDS_DATABASE"] # format database is stored in
         engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}") # Creates the link to use
-        print(engine) #just a working check line
-        
-        
-
-        
-
-    def list_db_tables(self,engine,yaml_dict):
-        import pandas as pd
-        conn_engine = engine.connect()
-
-        db_tables = pd.read_sql('SELECT table_name FROM information_schema.tabls WHERE table_schema =' + yaml_dict["RDS_DATABASE"],conn_engine)
-
-        db_tables_list = db_tables["TABLE_NAME"].to_list()
-        print(db_tables_list)
-        
-    
-
-  
-
+        self.list_db_tables(engine,yaml_dict)
 
     def read_db_creds(self):
         import yaml
@@ -62,6 +55,7 @@ class DatabaseConnector:
 def testing(): #just here to test the above class coding
     test = DatabaseConnector()
     test.read_db_creds()
+    
    
     
 
