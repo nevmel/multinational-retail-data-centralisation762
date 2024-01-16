@@ -22,6 +22,7 @@ class DatabaseConnector:
         conn_engine = self.engine.connect() #connect to database from yaml file
         db_tables_df = pd.read_sql('SELECT * FROM information_schema.tables',conn_engine)#what info to collect
         db_tables_list = db_tables_df["table_name"].to_list()#list of all table names in database
+        return db_tables_df
         
       
        
@@ -51,9 +52,6 @@ class DatabaseConnector:
         
 
 
-test = DatabaseConnector()
-
-print(test.list_db_tables())
 
 
 
