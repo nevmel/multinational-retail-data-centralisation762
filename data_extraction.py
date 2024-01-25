@@ -33,7 +33,7 @@ class DataExtractor:
 
 
         
-
+    def list_number_of_stores():
         pass
 
 
