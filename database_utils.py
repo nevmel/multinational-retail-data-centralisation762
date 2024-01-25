@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+import psycopg2
 
 
 class DatabaseConnector:
@@ -10,7 +11,7 @@ class DatabaseConnector:
         self.yaml_dict = self.read_db_creds()
         self.engine = self.init_db_engine()
         self.tables = self.list_db_tables()
-
+        self.out_engine = self.upload_to_db()
         pass
     """initailising the 'self' command. Nothing else being passed in at the moment to class"""
 
@@ -47,10 +48,23 @@ class DatabaseConnector:
         from pathlib import Path
         yaml_dict = yaml.safe_load(Path("db_creds.yaml").read_text()) #creating dictionary from the YAML file to be passed to init_db_engine
         return yaml_dict
-      
-        
-        
+           
+    def  upload_to_db(self):   
+        #with psycopg2.connect(host='localhost',user='postgres', password= 'Beverly01!', dbname='sales_data',port = 5432) as out_conn:
+         
+                 # Database connection details
+        DATABASE_TYPE = 'postgresql' #type of database being connected to 
+        DBAPI = 'psycopg2' #which API is being used to connect (these could be contained in the yaml file, but aren't in this case)
+        ENDPOINT = 'localhost' #id details of the store for the database. In this case an AWS cloud location
+        USER = 'postgres' # Name of user
+        PASSWORD = 'Beverly01!' #Password, not transmitted in clear when connecting
+        PORT = '5432' #standard 5432 in this case, but can be bespoke
+        DATABASE = 'sales_data' # format database is stored in
+        out_conn = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}") # Creates the link to use
+         
+        return out_conn
 
+        pass        
 
 
 
